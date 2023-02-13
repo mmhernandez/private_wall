@@ -32,7 +32,9 @@
                     <label for="user" class="form-label">Send to: </label>
                     <select name="user" class="form-select mb-2 w-50">
                     {% for user in users %}
-                        <option value="{{user.first_name}}">{{user.first_name}}</option>
+                        {% if user.id != session["id"] %}
+                            <option value="{{user.first_name}}">{{user.first_name}}</option>
+                        {% endif %}
                     {% endfor %}
                 </select>
                 </div>
