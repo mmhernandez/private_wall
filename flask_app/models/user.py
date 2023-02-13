@@ -1,4 +1,5 @@
 from flask_app.config.mysqlconnection import connectToMySQL
+from flask_app.models import message
 from flask import flash
 from flask_bcrypt import Bcrypt
 from flask_app import app
@@ -17,8 +18,7 @@ class User:
         self.password = data["password"]
         self.created_at = data["created_at"]
         self.updated_at = data["updated_at"]
-        self.posts = []
-        self.comments = []
+        self.messages = []
 
     @staticmethod
     def validate_registration(data):
@@ -68,6 +68,14 @@ class User:
             is_valid = False
         
         return is_valid
+
+    @staticmethod
+    def count_messages(id):
+        user_info = User.get_one_with_messages(({"id": id}))
+        count = 0
+        for message in user_info.messages:
+            count += 1
+        return count
     
     @classmethod
     def get_user_by_email(cls, data):
@@ -90,3 +98,40 @@ class User:
         hashed_password = bcrypt.generate_password_hash(data["password"])
         data.update({"password": hashed_password})
         return connectToMySQL(db).query_db(query, data)
+
+    @classmethod
+    def get_one_with_messages(cls, data):
+        query = '''
+            SELECT * 
+            FROM users U
+            LEFT JOIN messages M ON U.id = M.recipient_id
+            WHERE U.id = %(id)s;
+        '''
+        results = connectToMySQL(db).query_db(query, data)
+        user_obj = cls(results[0])
+        for row in results:
+            if row["M.id"] != None:
+                message_info = {
+                    "id": row["M.id"],
+                    "content": row["content"],
+                    "created_at": row["M.created_at"],
+                    "updated_at": row["M.updated_at"],
+                    "sender_id": row["sender_id"],
+                    "recipient_id": row["recipient_id"],
+                    "id": row["id"]
+                }
+                user_obj.messages = message.Message(message_info)
+        return user_obj
+        
+    @classmethod
+    def get_all(cls):
+        query = '''
+            SELECT *
+            FROM users
+            ORDER BY first_name;
+        '''
+        results = connectToMySQL(db).query_db(query)
+        users = []
+        for row in results:
+            users.append(cls(row))
+        return results

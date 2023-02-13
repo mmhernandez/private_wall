@@ -11,16 +11,34 @@
     <header class="container border-bottom py-4 d-flex justify-content-between">
         <h3>Private Wall</h3>
         <div class="d-flex gap-4">
-            <p>Welcome xxxx!</p>
+            <p>Welcome {{user_data.first_name}}!</p>
             <a href="/logout" class="btn btn-secondary">Logout</a>
         </div>
     </header>
     <div class="container d-flex justify-content-between gap-2 mx-5">
         <div class="container m-4">
-            <p class="fw-bold border-bottom py-3">Messages for You</p>
+            <p class="fw-bold border-bottom py-3 mb-5"><span class="text-info">{{message_count}}</span> Message(s) for You</p>
+            {% for message in messages %}
+                <div class="mb-3 bg-light p-3">
+
+                </div>
+            {% endfor %}
         </div>
         <div class="container m-4">
             <p class="fw-bold border-bottom py-3">Send Messages</p>
+            <p>You have sent <span class="text-info">##</span> messages so far</p>
+            <form action="/send_message">
+                <div class="d-flex gap-3">
+                    <label for="user" class="form-label">Send to: </label>
+                    <select name="user" class="form-select mb-2 w-50">
+                    {% for user in users %}
+                        <option value="{{user.first_name}}">{{user.first_name}}</option>
+                    {% endfor %}
+                </select>
+                </div>
+                <textarea name="content" cols="20" rows="5" class="form-control"></textarea>
+                <input type="submit" value="Send" class="btn btn-info mt-3">
+            </form>
         </div>
     </div>
 </body>
