@@ -101,6 +101,7 @@ class User:
 
     @classmethod
     def get_one_with_messages(cls, data):
+        print(f'data = {data}')
         query = '''
             SELECT * 
             FROM users U
@@ -108,6 +109,7 @@ class User:
             WHERE U.id = %(id)s;
         '''
         results = connectToMySQL(db).query_db(query, data)
+        # print(f"results")
         user_obj = cls(results[0])
         for row in results:
             if row["M.id"] != None:

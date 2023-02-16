@@ -44,7 +44,7 @@ def wall():
 
         message_count = 0
         if user_data.messages:
-            user.User.count_messages({"id": session['id']})
+            user.User.count_messages({session['id']})
         
         message_data = message.Message.get_all_by_user_with_sender({"id": session['id']})
         

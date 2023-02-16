@@ -27,15 +27,22 @@
         <div class="container m-4">
             <p class="fw-bold border-bottom py-3">Send Messages</p>
             <p>You have sent <span class="text-info">##</span> messages so far</p>
-            <form action="/send_message">
+            <form action="/send_message" method="post">
                 <div class="d-flex gap-3">
                     <label for="user" class="form-label">Send to: </label>
                     <select name="user" class="form-select mb-2 w-50">
                     {% for user in users %}
                         {% if user.id != session["id"] %}
-                            <option value="{{user.first_name}}">{{user.first_name}}</option>
+                            <option value="{{user.id}}">{{user.first_name}}</option>
                         {% endif %}
                     {% endfor %}
+                    {% with messages = get_flashed_messages(category_filter=["message"])%}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <p class="text-danger">{{message}}</p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
                 </select>
                 </div>
                 <textarea name="content" cols="20" rows="5" class="form-control"></textarea>

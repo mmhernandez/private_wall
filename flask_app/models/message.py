@@ -59,3 +59,10 @@ class Message:
             messages.append(message_obj)
         return messages
 
+    @classmethod
+    def insert_message(cls, data):
+        query = '''
+            INSERT INTO messages (content, sender_id, recipient_id)
+            VALUES (%(content)s, %(sender_id)s, %(recipient_id)s);
+        '''
+        connectToMySQL(db).query_db(query, data)
