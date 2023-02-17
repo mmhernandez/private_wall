@@ -1,6 +1,7 @@
 from flask_app import app
 from flask import render_template, redirect, request, session
 from flask_app.models import user, message
+from datetime import datetime
 
 @app.route("/")
 def login_registration():
@@ -40,17 +41,23 @@ def login():
 @app.route("/wall")
 def wall():
     if "id" in session:
-        user_data = user.User.get_one_with_messages({"id": session['id']})
+        user_data = user.User.get_one_by_id({"id": session['id']})
+        
+        message_data = message.Message.get_all_by_user({"id": session['id']})
 
-        message_count = 0
-        if user_data.messages:
-            user.User.count_messages({session['id']})
-        
-        message_data = message.Message.get_all_by_user_with_sender({"id": session['id']})
-        
+        sent_msg_count = 0
+        recvd_msg_count = 0
+        for each in message_data:
+            if each.sender.id == session["id"]:
+                sent_msg_count += 1
+            if each.recipient.id == session["id"]:
+                recvd_msg_count += 1
+
         users_list = user.User.get_all()
 
-        return render_template("wall.html", user_data=user_data, message_count=message_count, messages=message_data, users=users_list)
+        now = datetime.now()
+
+        return render_template("wall.html", user_data=user_data,sent_msgs=sent_msg_count, rec_msgs=recvd_msg_count,messages=message_data, users=users_list, now=now)
     return redirect("/")
 
 @app.route("/logout")

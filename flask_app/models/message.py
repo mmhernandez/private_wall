@@ -13,7 +13,7 @@ class Message:
         self.sender_id = data["sender_id"]
         self.recipient_id = data["recipient_id"]
         self.sender = None
-        self.recipent = None
+        self.recipient = None
 
     @staticmethod
     def validate_message(data):
@@ -24,13 +24,13 @@ class Message:
         return is_valid
 
     @classmethod
-    def get_all_by_user_with_sender(cls, data):
+    def get_all_by_user(cls, data):
         query = '''
             SELECT * 
             FROM messages M
             LEFT JOIN users SU on M.sender_id = SU.id
-            LEFT JOIN users RU on M.recipient_id = SU.id
-            WHERE RU.id = %(id)s;
+            LEFT JOIN users RU on M.recipient_id = RU.id
+            WHERE RU.id = %(id)s or SU.id = %(id)s;
         '''
         results = connectToMySQL(db).query_db(query, data)
         messages = []
@@ -38,10 +38,10 @@ class Message:
             message_obj = cls(row)
             sender_info = {
                 "id": row["SU.id"],
-                "first_name": row["SU.first_name"],
-                "last_name": row["SU.last_name"],
-                "email": row["SU.email"],
-                "password": row["SU.password"],
+                "first_name": row["first_name"],
+                "last_name": row["last_name"],
+                "email": row["email"],
+                "password": row["password"],
                 "created_at": row["SU.created_at"],
                 "updated_at": row["SU.updated_at"]
             }
@@ -55,7 +55,7 @@ class Message:
                 "created_at": row["RU.created_at"],
                 "updated_at": row["RU.updated_at"]
             }
-            message_obj.recipent = user.User(recipient_info)
+            message_obj.recipient = user.User(recipient_info)
             messages.append(message_obj)
         return messages
 

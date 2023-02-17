@@ -68,14 +68,6 @@ class User:
             is_valid = False
         
         return is_valid
-
-    @staticmethod
-    def count_messages(id):
-        user_info = User.get_one_with_messages(({"id": id}))
-        count = 0
-        for message in user_info.messages:
-            count += 1
-        return count
     
     @classmethod
     def get_user_by_email(cls, data):
@@ -88,6 +80,16 @@ class User:
         if len(results) < 1:
             return False
         return cls(results[0])
+
+    @classmethod
+    def get_one_by_id(cls, data):
+        query = '''
+            SELECT * 
+            FROM users
+            WHERE id = %(id)s;
+        '''
+        results = connectToMySQL(db).query_db(query, data)
+        return cls(results[0])
     
     @classmethod
     def insert(cls, data):
@@ -99,32 +101,6 @@ class User:
         data.update({"password": hashed_password})
         return connectToMySQL(db).query_db(query, data)
 
-    @classmethod
-    def get_one_with_messages(cls, data):
-        print(f'data = {data}')
-        query = '''
-            SELECT * 
-            FROM users U
-            LEFT JOIN messages M ON U.id = M.recipient_id
-            WHERE U.id = %(id)s;
-        '''
-        results = connectToMySQL(db).query_db(query, data)
-        # print(f"results")
-        user_obj = cls(results[0])
-        for row in results:
-            if row["M.id"] != None:
-                message_info = {
-                    "id": row["M.id"],
-                    "content": row["content"],
-                    "created_at": row["M.created_at"],
-                    "updated_at": row["M.updated_at"],
-                    "sender_id": row["sender_id"],
-                    "recipient_id": row["recipient_id"],
-                    "id": row["id"]
-                }
-                user_obj.messages = message.Message(message_info)
-        return user_obj
-        
     @classmethod
     def get_all(cls):
         query = '''
